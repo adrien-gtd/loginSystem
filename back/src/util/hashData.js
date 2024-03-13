@@ -9,4 +9,13 @@ const hashData = async (data, saltRounds = 10) => {
     }   
 } 
 
-module.exports = { hashData }
+const veryfyHashData = async (unhashed, hashed) => {
+    try {
+        const match = bcrypt.compare(unhashed, hashed);
+        return match;
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { hashData, veryfyHashData }
