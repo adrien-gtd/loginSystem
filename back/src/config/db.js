@@ -1,11 +1,11 @@
 require('dotenv').config();
-const mariadb = require ('mariadb');
+const mongoose = require ('mongoose');
 
-const {DB_HOST, DB_USER, DB_PASSWORD, DB_PORT} = process.env;
+const { DB_URI } = process.env;
 
 const connectToDB = async () => {
     try {
-        const pool = mariadb.createPool({host: DB_HOST, user: DB_USER, password: DB_PASSWORD, port: DB_PORT, connectionLimit: 5});
+        await mongoose.connect(DB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
         console.log("Connected to the database");
     } catch (error) {
         console.log(error)
