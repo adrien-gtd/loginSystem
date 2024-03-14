@@ -29,9 +29,7 @@ const verifyOTP = async ({email, otp}) => {
 
         // not expired yet, verify value
         const hashedOTP = matchedOTPRecord.otp;
-        console.log(matchedOTPRecord)
         const validOTP = await verifyHashData(otp, hashedOTP);
-        console.log("yes")
 
         return validOTP
     } catch (error) {
@@ -71,7 +69,6 @@ const sendOTP = async ({email, subject, message, duration = 1}) => {
 
         // save OTP record
         const hashedOTP = await hashData(generatedOTP);
-        console.log(hashedOTP)
         const newOTP = await new OTP({
             email, 
             otp: hashedOTP,
