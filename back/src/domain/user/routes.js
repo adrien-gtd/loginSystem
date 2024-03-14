@@ -3,6 +3,16 @@ const router = express.Router();
 
 const { createNewUser, authenticateUser } = require("./controller");
 
+const auth = require("./../../middlware/auth");
+
+
+// Protected route
+router.get("/private_data", auth, (req, res) => {
+    res
+        .status(200)
+        .send(`You are in the private territory of ${req.currentUser.email}`);
+})
+
 // Signin
 router.post("/", async (req, res) => {
     try {
@@ -22,8 +32,6 @@ router.post("/", async (req, res) => {
         console.log(error.message);
     }
 })
-
-
 
 
 // Signup
