@@ -1,8 +1,52 @@
 const OTP = require("./model");
 const generateOTP = require("./../../util/generateOTP");
 const sendEmail = require("./../../util/sendEmail");
-const { hashData } = require("./../../util/hashData")
+const { hashData, verifyHashData } = require("./../../util/hashData")
 const { EMAIL_USER } = process.env;
+
+const verifyOTP = async ({email, otp}) => {
+    try {
+        if (!(email && otp)) {
+            throw Error("Provide values for email, otp");
+        }
+
+        // ensure otp record exists
+        const matchedOTPRecord = await OTP.findOne({
+            email,
+        });
+        
+        if (!matchedOTPRecord) {
+            throw Error("No OTP record found.");
+        }
+
+        const { expiresAt } = matchedOTPRecord;
+
+        // checking for expiring code
+        if (expiresAt < Date.now()) {
+            await OTP.deleteOne({email});
+            throw Error("Code has expired. Request for a new one.")
+        }
+
+        // not expired yet, verify value
+        const hashedOTP = matchedOTPRecord.otp;
+        console.log(matchedOTPRecord)
+        const validOTP = await verifyHashData(otp, hashedOTP);
+        console.log("yes")
+
+        return validOTP
+    } catch (error) {
+        throw error;
+    }
+}
+
+const deleteOTP = async (email) => {
+    try {
+        await OTP.deleteOne({email});
+    } catch (error) {
+        throw error;
+    }
+};
+
 
 const sendOTP = async ({email, subject, message, duration = 1}) => {
     try {
@@ -23,10 +67,11 @@ const sendOTP = async ({email, subject, message, duration = 1}) => {
             subject,
             html: `<p>${message}<p/><p style="color:tomato;font-size:25px;letter-spacing:2px;"><b>${generatedOTP}</b></p><p>This code <b>expires in ${duration} hour(s)</b>.</p>`,
         }
-        await sendEmail(mailOptions)
+        await sendEmail(mailOptions);
 
         // save OTP record
-        const hashedOTP = await hashData(generateOTP);
+        const hashedOTP = await hashData(generatedOTP);
+        console.log(hashedOTP)
         const newOTP = await new OTP({
             email, 
             otp: hashedOTP,
@@ -41,4 +86,4 @@ const sendOTP = async ({email, subject, message, duration = 1}) => {
     }
 }
 
-module.exports = { sendOTP }
+module.exports = { sendOTP, verifyOTP, deleteOTP };

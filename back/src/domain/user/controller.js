@@ -1,5 +1,5 @@
 const User = require("./model");
-const { hashData, veryfyHashData } = require('./../../util/hashData');
+const { hashData, verifyHashData } = require('./../../util/hashData');
 const createToken = require("./../../util/createToken");
 
 const createNewUser = async (data) => {
@@ -39,7 +39,7 @@ const authenticateUser = async (data) => {
         }
 
         const hashPassword = fetchUser.password;
-        const passwordMatch = await veryfyHashData(password, hashPassword);
+        const passwordMatch = await verifyHashData(password, hashPassword);
         if (!passwordMatch) {
             throw Error("Invalid password provided");
         }
